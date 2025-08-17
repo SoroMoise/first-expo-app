@@ -1,21 +1,18 @@
-import { View, type ViewProps, type ViewStyle } from "react-native";
-import { Shadows } from "@/constants/Schadows";
-import { useThemeColors } from "@/hooks/useThemeColors";
+import { View, type ViewProps, type ViewStyle } from 'react-native'
+import { Shadows } from '@/constants/Schadows'
+import { useThemeColors } from '@/hooks/useThemeColors'
 
-type Props = ViewProps;
+type Props = ViewProps
 
 export function Card({ style, ...rest }: Props) {
-  const colors = useThemeColors();
-  return (
-    <View
-      style={[style, styles, { backgroundColor: colors.grayWhite }]}
-      {...rest}
-    />
-  );
+  const colors = useThemeColors()
+
+  return <View style={[style, styles, { backgroundColor: colors.grayWhite }]} {...rest} />
 }
 
 const styles = {
-  backgroundColor: "#fff",
+  backgroundColor: '#fff',
   borderRadius: 8,
+  overflow: 'hidden',
   ...Shadows.dp2,
-} satisfies ViewStyle;
+} satisfies ViewStyle
