@@ -21,11 +21,12 @@ export function SearchBar({ value, onChange }: Readonly<Props>) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    borderRadius: 16,
-    height: 37,
+    height: 40,
+    borderRadius: 40,
     paddingHorizontal: 12,
   },
   input: {
     flex: 1,
+    paddingHorizontal: 12,
   },
 })
