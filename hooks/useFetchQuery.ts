@@ -9,14 +9,29 @@ type API = {
     previous: string | null
     results: { name: string; url: string }[]
   }
+  '/pokemon/[id]': {
+    name: string
+    id: number
+    url: string
+    weight: number
+    height: number
+    order: number
+    base_experience: number
+    cries: { latest: string }
+    types: { type: { name: string; url: string } }[]
+    stats: { base_stat: number; stat: { name: string } }[]
+  }
 }
 
-export function useFetchQuery<T extends keyof API>(path: T) {
+export function useFetchQuery<T extends keyof API>(path: T, params?: Record<string, string | number>) {
+  const localUrl =
+    endpoint + Object.entries(params ?? {}).reduce((acc, [key, value]) => acc.replaceAll(`[${key}]`, value), path)
+
   return useQuery({
-    queryKey: [path],
+    queryKey: [localUrl],
     queryFn: async () => {
-      await wait(0.5)
-      return fetch(endpoint + path).then((res) => res.json()) as Promise<API[T]>
+      await wait(0.1)
+      return fetch(localUrl).then((res) => res.json()) as Promise<API[T]>
     },
   })
 }
@@ -26,7 +41,7 @@ export function useInfiniteFetchQuery<T extends keyof API>(path: T) {
     queryKey: [path],
     initialPageParam: endpoint + path,
     queryFn: async ({ pageParam }) => {
-      await wait(0.5)
+      await wait(0.1)
       return fetch(pageParam, {
         headers: {
           Accept: 'application/json',
