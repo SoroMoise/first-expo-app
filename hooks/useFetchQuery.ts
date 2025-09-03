@@ -23,6 +23,9 @@ type API = {
     stats: { base_stat: number; stat: { name: string } }[]
     moves: { move: { name: string; url: string } }[]
   }
+  '/pokemon-species/[id]': {
+    flavor_text_entries: { flavor_text: string; language: { name: string } }[]
+  }
 }
 
 export function useFetchQuery<T extends keyof API>(path: T, params?: Record<string, string | number>) {

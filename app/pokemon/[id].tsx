@@ -16,10 +16,14 @@ export default function Pokemon() {
   const colors = useThemeColors()
   const params = useLocalSearchParams() as { id: string }
   const { data: pokemon } = useFetchQuery('/pokemon/[id]', { id: params.id })
+  const { data: spacies } = useFetchQuery('/pokemon-species/[id]', { id: params.id })
   const mainType = pokemon?.types[0].type.name
   const colorType = mainType ? Colors.type[mainType] : colors.tint
 
   const types = pokemon?.types ?? []
+  const bio = spacies?.flavor_text_entries
+    .find(({ language }) => language.name === 'fr')
+    ?.flavor_text.replaceAll('\n', '. ')
 
   return (
     <RootView style={{ backgroundColor: colorType }}>
@@ -70,6 +74,7 @@ export default function Pokemon() {
                 description="Moves"
               />
             </Row>
+            <ThemedText>{bio}</ThemedText>
             <ThemedText variant="subtitle1" style={[{ color: colorType, paddingTop: 10 }]}>
               Base stats
             </ThemedText>
