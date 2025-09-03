@@ -41,7 +41,7 @@ export default function Index() {
   return (
     <RootView>
       <Row style={styles.header} gap={16}>
-        <Image source={require('@/assets/images/icons/Pokeball.png')} width={24} height={24} />
+        <Image source={require('@/assets/images/icons/pokeball.png')} width={24} height={24} />
         <ThemedText variant="headline1" color="grayLight">
           Pokédex
         </ThemedText>
