@@ -1,6 +1,7 @@
 import { Card } from '@/components/Card'
 import { PokemonSpec } from '@/components/pokemon/PokemonSpec'
 import { PokemonType } from '@/components/pokemon/PokemonType'
+import { PokemonStat } from '@/components/pokemon/PpokemonStat'
 import { RootView } from '@/components/RootView'
 import { Row } from '@/components/Row'
 import { ThemedText } from '@/components/themedText'
@@ -50,7 +51,7 @@ export default function Pokemon() {
                 <PokemonType name={type.type.name} key={type.type.name} />
               ))}
             </Row>
-            <ThemedText variant="subtitle1" style={[{ color: colorType, paddingTop: 10 }]}>
+            <ThemedText variant="subtitle1" style={[{ color: colorType, paddingTop: 15, paddingBottom: 10 }]}>
               About
             </ThemedText>
             <Row>
@@ -75,14 +76,16 @@ export default function Pokemon() {
               />
             </Row>
             <ThemedText>{bio}</ThemedText>
-            <ThemedText variant="subtitle1" style={[{ color: colorType, paddingTop: 10 }]}>
+            <ThemedText variant="subtitle1" style={[{ color: colorType, paddingTop: 15, paddingBottom: 10 }]}>
               Base stats
             </ThemedText>
+            <View style={{ alignSelf: 'stretch' }}>
+              {pokemon?.stats.map((stat) => (
+                <PokemonStat key={stat.stat.name} name={stat.stat.name} value={stat.base_stat} color={colorType} />
+              ))}
+            </View>
           </Card>
         </View>
-        <ThemedText color="grayWhite" variant="headline1">
-          {pokemon?.name}
-        </ThemedText>
       </View>
     </RootView>
   )
@@ -121,6 +124,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 20,
     paddingTop: 50,
-    paddingBottom: 10,
+    paddingBottom: 20,
   },
 })
