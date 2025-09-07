@@ -27,7 +27,7 @@ export default function Pokemon() {
     ?.flavor_text.replaceAll('\n', '. ')
 
   return (
-    <RootView style={{ backgroundColor: colorType }}>
+    <RootView backgroundColor={colorType}>
       <View>
         <Image source={require('@/assets/images/icons/pokeball-big.png')} style={styles.pokeballBig} />
         <Row style={styles.header}>
