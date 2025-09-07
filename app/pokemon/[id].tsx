@@ -5,7 +5,7 @@ import { PokemonStat } from '@/components/pokemon/PpokemonStat'
 import { RootView } from '@/components/RootView'
 import { Row } from '@/components/Row'
 import { ThemedText } from '@/components/themedText'
-import { Colors } from '@/constants/Colors'
+import { Colors, basePokemonStats } from '@/constants/Colors'
 import { formatHeight, formatWeight, getPokemonArtwork } from '@/functions/pokemons'
 import { useFetchQuery } from '@/hooks/useFetchQuery'
 import { useThemeColors } from '@/hooks/useThemeColors'
@@ -25,6 +25,8 @@ export default function Pokemon() {
   const bio = spacies?.flavor_text_entries
     .find(({ language }) => language.name === 'fr')
     ?.flavor_text.replaceAll('\n', '. ')
+
+  const stats = pokemon?.stats ?? basePokemonStats
 
   return (
     <RootView backgroundColor={colorType}>
@@ -46,7 +48,7 @@ export default function Pokemon() {
         <View style={styles.body}>
           <Image source={{ uri: getPokemonArtwork(params.id) }} style={styles.artwork} />
           <Card style={styles.card}>
-            <Row gap={16}>
+            <Row gap={16} style={{ height: 18 }}>
               {types.map((type) => (
                 <PokemonType name={type.type.name} key={type.type.name} />
               ))}
@@ -75,12 +77,12 @@ export default function Pokemon() {
                 description="Moves"
               />
             </Row>
-            <ThemedText>{bio}</ThemedText>
+            <ThemedText style={{ minHeight: 25 }}>{bio}</ThemedText>
             <ThemedText variant="subtitle1" style={[{ color: colorType, paddingTop: 15, paddingBottom: 10 }]}>
               Base stats
             </ThemedText>
             <View style={{ alignSelf: 'stretch' }}>
-              {pokemon?.stats.map((stat) => (
+              {stats.map((stat) => (
                 <PokemonStat key={stat.stat.name} name={stat.stat.name} value={stat.base_stat} color={colorType} />
               ))}
             </View>

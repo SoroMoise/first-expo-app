@@ -35,7 +35,7 @@ export function useFetchQuery<T extends keyof API>(path: T, params?: Record<stri
   return useQuery({
     queryKey: [localUrl],
     queryFn: async () => {
-      await wait(0.1)
+      await wait(0.3)
       return fetch(localUrl).then((res) => res.json()) as Promise<API[T]>
     },
   })

@@ -7,9 +7,9 @@ export function getPokemonArtwork(id: number | string): string {
 }
 
 export function formatWeight(weight?: number): string {
-  return weight ? (weight / 10).toString().replace('.', ',') + 'kg' : ''
+  return weight ? (weight / 10).toString().replace('.', ',') + 'kg' : '--'
 }
 
 export function formatHeight(height?: number): string {
-  return height ? (height / 10).toString().replace('.', ',') + 'm' : ''
+  return height ? (height / 10).toString().replace('.', ',') + 'm' : '--'
 }

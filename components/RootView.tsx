@@ -31,7 +31,7 @@ export function RootView({ style, backgroundColor, ...rest }: Readonly<Props>) {
 
       progress.value = withTiming(1, {
         duration: 700,
-        easing: Easing.inOut(Easing.quad),
+        easing: Easing.out(Easing.quad),
         reduceMotion: ReduceMotion.System,
       })
     }
