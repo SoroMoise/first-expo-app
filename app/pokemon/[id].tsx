@@ -6,25 +6,79 @@ import { RootView } from '@/components/RootView'
 import { Row } from '@/components/Row'
 import { ThemedText } from '@/components/themedText'
 import { Colors, basePokemonStats } from '@/constants/Colors'
+import { LAST_ITEM_ID } from '@/constants/Pokemon'
 import { formatHeight, formatWeight, getPokemonArtwork } from '@/functions/pokemons'
 import { useFetchQuery } from '@/hooks/useFetchQuery'
 import { useThemeColors } from '@/hooks/useThemeColors'
 import { Audio } from 'expo-av'
 import { Image } from 'expo-image'
 import { router, useLocalSearchParams } from 'expo-router'
+import { useRef, useState } from 'react'
 import { Pressable, StyleSheet, View } from 'react-native'
+import PagerView from 'react-native-pager-view'
 
 export default function Pokemon() {
-  const colors = useThemeColors()
   const params = useLocalSearchParams() as { id: string }
-  const { data: pokemon } = useFetchQuery('/pokemon/[id]', { id: params.id })
-  const { data: spacies } = useFetchQuery('/pokemon-species/[id]', { id: params.id })
+  const [id, setId] = useState(parseInt(params.id, 10))
+  const offset = useRef(1)
+  const pager = useRef<PagerView>(null)
+
+  const onPageSelected = (e: { nativeEvent: { position: number } }) => {
+    offset.current = e.nativeEvent.position - 1
+  }
+
+  const onPageScrollStateChanged = (e: { nativeEvent: { pageScrollState: string } }) => {
+    if (e.nativeEvent.pageScrollState !== 'idle') return
+
+    if (offset.current === -1 && id === 2) return
+
+    if (offset.current === 1 && id === LAST_ITEM_ID - 1) return
+
+    if (offset.current != 0) {
+      setId(id + offset.current)
+      offset.current = 0
+
+      pager.current?.setPageWithoutAnimation(1)
+    }
+  }
+
+  const onPrevious = () => {
+    pager.current?.setPage(0)
+  }
+
+  const onNext = () => {
+    pager.current?.setPage(2 + offset.current)
+  }
+
+  return (
+    <PagerView
+      ref={pager}
+      onPageSelected={onPageSelected}
+      onPageScrollStateChanged={onPageScrollStateChanged}
+      initialPage={1}
+      style={{ flex: 1 }}
+    >
+      <PokemonView key={id - 1} id={id - 1} onPrevious={onPrevious} onNext={onNext} />
+      <PokemonView key={id} id={id} onPrevious={onPrevious} onNext={onNext} />
+      <PokemonView key={id + 1} id={id + 1} onPrevious={onPrevious} onNext={onNext} />
+    </PagerView>
+  )
+}
+
+type Props = {
+  id: number
+  onPrevious: () => void
+  onNext: () => void
+}
+
+export function PokemonView({ id, onPrevious, onNext }: Readonly<Props>) {
+  const colors = useThemeColors()
+  const { data: pokemon } = useFetchQuery('/pokemon/[id]', { id })
+  const { data: spacies } = useFetchQuery('/pokemon-species/[id]', { id })
   const mainType = pokemon?.types[0].type.name
   const colorType = mainType ? Colors.type[mainType] : colors.tint
   const types = pokemon?.types ?? []
   const stats = pokemon?.stats ?? basePokemonStats
-
-  const currentPokemonId = parseInt(params.id, 10)
 
   const bio = spacies?.flavor_text_entries
     .find(({ language }) => language.name === 'fr')
@@ -39,16 +93,8 @@ export default function Pokemon() {
     sound.playAsync()
   }
 
-  const onPrevious = () => {
-    router.replace({ pathname: '/pokemon/[id]', params: { id: Math.max(currentPokemonId - 1, 1) } })
-  }
-
-  const onNext = () => {
-    router.replace({ pathname: '/pokemon/[id]', params: { id: currentPokemonId + 1 } })
-  }
-
-  const isFirst = currentPokemonId === 1
-  const isLast = currentPokemonId === 10277
+  const isFirst = id === 1
+  const isLast = id === LAST_ITEM_ID
 
   return (
     <RootView backgroundColor={colorType}>
@@ -64,7 +110,7 @@ export default function Pokemon() {
             </ThemedText>
           </Row>
           <ThemedText color="grayWhite" variant="subtitle2">
-            #{params.id.padStart(3, '0')}
+            #{id.toString().padStart(3, '0')}
           </ThemedText>
         </Row>
         <View style={styles.body}>
@@ -72,17 +118,17 @@ export default function Pokemon() {
             {isFirst ? (
               <View style={styles.chevron}></View>
             ) : (
-              <Pressable onPress={onPrevious}>
+              <Pressable onPress={onPrevious} style={{ padding: 20 }}>
                 <Image source={require('@/assets/images/icons/chevron-left.png')} style={[styles.chevron]} />
               </Pressable>
             )}
             <Pressable onPress={onImagePress}>
-              <Image source={{ uri: getPokemonArtwork(currentPokemonId) }} style={styles.artwork} />
+              <Image source={{ uri: getPokemonArtwork(id) }} style={styles.artwork} />
             </Pressable>
             {isLast ? (
               <View style={styles.chevron}></View>
             ) : (
-              <Pressable onPress={onNext}>
+              <Pressable onPress={onNext} style={{ padding: 20 }}>
                 <Image source={require('@/assets/images/icons/chevron-right.png')} style={[styles.chevron]} />
               </Pressable>
             )}
@@ -159,7 +205,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     left: 0,
     right: 0,
-    marginHorizontal: 20,
     top: -144,
     zIndex: 2,
   },
