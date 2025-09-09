@@ -9,6 +9,7 @@ import { Colors, basePokemonStats } from '@/constants/Colors'
 import { formatHeight, formatWeight, getPokemonArtwork } from '@/functions/pokemons'
 import { useFetchQuery } from '@/hooks/useFetchQuery'
 import { useThemeColors } from '@/hooks/useThemeColors'
+import { Audio } from 'expo-av'
 import { Image } from 'expo-image'
 import { router, useLocalSearchParams } from 'expo-router'
 import { Pressable, StyleSheet, View } from 'react-native'
@@ -20,13 +21,34 @@ export default function Pokemon() {
   const { data: spacies } = useFetchQuery('/pokemon-species/[id]', { id: params.id })
   const mainType = pokemon?.types[0].type.name
   const colorType = mainType ? Colors.type[mainType] : colors.tint
-
   const types = pokemon?.types ?? []
+  const stats = pokemon?.stats ?? basePokemonStats
+
+  const currentPokemonId = parseInt(params.id, 10)
+
   const bio = spacies?.flavor_text_entries
     .find(({ language }) => language.name === 'fr')
     ?.flavor_text.replaceAll('\n', '. ')
 
-  const stats = pokemon?.stats ?? basePokemonStats
+  const onImagePress = async () => {
+    const cry = pokemon?.cries.latest
+
+    if (!cry) return
+
+    const { sound } = await Audio.Sound.createAsync({ uri: cry }, { shouldPlay: true })
+    sound.playAsync()
+  }
+
+  const onPrevious = () => {
+    router.replace({ pathname: '/pokemon/[id]', params: { id: Math.max(currentPokemonId - 1, 1) } })
+  }
+
+  const onNext = () => {
+    router.replace({ pathname: '/pokemon/[id]', params: { id: currentPokemonId + 1 } })
+  }
+
+  const isFirst = currentPokemonId === 1
+  const isLast = currentPokemonId === 10277
 
   return (
     <RootView backgroundColor={colorType}>
@@ -46,7 +68,25 @@ export default function Pokemon() {
           </ThemedText>
         </Row>
         <View style={styles.body}>
-          <Image source={{ uri: getPokemonArtwork(params.id) }} style={styles.artwork} />
+          <Row style={styles.artworkRow}>
+            {isFirst ? (
+              <View style={styles.chevron}></View>
+            ) : (
+              <Pressable onPress={onPrevious}>
+                <Image source={require('@/assets/images/icons/chevron-left.png')} style={[styles.chevron]} />
+              </Pressable>
+            )}
+            <Pressable onPress={onImagePress}>
+              <Image source={{ uri: getPokemonArtwork(currentPokemonId) }} style={styles.artwork} />
+            </Pressable>
+            {isLast ? (
+              <View style={styles.chevron}></View>
+            ) : (
+              <Pressable onPress={onNext}>
+                <Image source={require('@/assets/images/icons/chevron-right.png')} style={[styles.chevron]} />
+              </Pressable>
+            )}
+          </Row>
           <Card style={styles.card}>
             <Row gap={16} style={{ height: 18 }}>
               {types.map((type) => (
@@ -110,14 +150,20 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
   },
-  artwork: {
+  chevron: {
+    width: 25,
+    height: 25,
+  },
+  artworkRow: {
     position: 'absolute',
-    alignSelf: 'center',
+    justifyContent: 'space-between',
+    left: 0,
+    right: 0,
+    marginHorizontal: 20,
     top: -144,
-    width: 200,
-    height: 200,
     zIndex: 2,
   },
+  artwork: { width: 200, height: 200 },
   body: {
     marginTop: 144,
   },
